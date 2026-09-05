@@ -1,47 +1,34 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <style>
-    body, html {
-      margin: 0;
-      padding: 0;
-      width: 100vw;
-      height: 100vh;
-      overflow: hidden;
-      background-color: transparent;
-    }
-    video {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      display: none;
-    }
-  </style>
-</head>
-<body>
-  <video id="screamer" src="screamer.mp4" playsinline></video>
+<script>
+  const video = document.getElementById('screamer');
 
-  <script>
-    const video = document.getElementById('screamer');
+  function triggerScreamer() {
+    video.style.display = 'block';
+    video.currentTime = 0;
+    video.play().catch(e => console.log(e));
+  }
 
-    function triggerScreamer() {
-      video.style.display = 'block';
-      video.currentTime = 0;
-      video.play().catch(e => console.log(e));
-    }
+  video.onended = () => {
+    video.style.display = 'none';
+  };
 
-    video.onended = () => {
-      video.style.display = 'none';
-    };
+  const ws = new WebSocket('ws://127.0.0.1:8080/');
 
-    // Conectar con el WebSocket Server de Streamer.bot
-    const ws = new WebSocket('ws://127.0.0.1:8080/');
+  ws.onopen = () => {
+    // Suscribir el HTML a los eventos de Twitch Cheer en Streamer.bot
+    ws.send(JSON.stringify({
+      "request": "Subscribe",
+      "events": {
+        "Twitch": ["Cheer"]
+      },
+      "id": "jumpscare-overlay"
+    }));
+  };
 
-    ws.onmessage = (event) => {
-      // Cada vez que Streamer.bot activa el Trigger (sea por simulación o Bits reales), dispara el vídeo
+  ws.onmessage = (event) => {
+    const data = JSON.parse(event.data);
+    // Dispara si es un evento Cheer de Twitch o si recibe cualquier señal de prueba
+    if ((data.event && data.event.type === 'Cheer') || data.status === 'ok') {
       triggerScreamer();
-    };
-  </script>
-</body>
-</html>
+    }
+  };
+</script>
