@@ -25,7 +25,7 @@
   <script>
     const video = document.getElementById('screamer');
 
-    function playJumpscare() {
+    function triggerScreamer() {
       video.style.display = 'block';
       video.currentTime = 0;
       video.play().catch(e => console.log(e));
@@ -35,8 +35,15 @@
       video.style.display = 'none';
     };
 
-    // Al cargar o recargar se dispara la animación
-    window.onload = playJumpscare;
+    // Conexión directa a Streamer.bot (WebSocket)
+    const ws = new WebSocket('ws://127.0.0.1:8080/');
+
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      if (data.event && data.event.type === 'Cheer') {
+        triggerScreamer();
+      }
+    };
   </script>
 </body>
 </html>
