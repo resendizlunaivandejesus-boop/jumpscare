@@ -35,14 +35,12 @@
       video.style.display = 'none';
     };
 
-    // Conexión directa a Streamer.bot (WebSocket)
+    // Conectar con el WebSocket Server de Streamer.bot
     const ws = new WebSocket('ws://127.0.0.1:8080/');
 
     ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      if (data.event && data.event.type === 'Cheer') {
-        triggerScreamer();
-      }
+      // Cada vez que Streamer.bot activa el Trigger (sea por simulación o Bits reales), dispara el vídeo
+      triggerScreamer();
     };
   </script>
 </body>
